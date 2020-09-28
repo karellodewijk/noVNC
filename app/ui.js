@@ -168,9 +168,8 @@ const UI = {
         UI.initSetting('show_dot', false);
         UI.initSetting('path', 'websockify');
         UI.initSetting('repeaterID', '');
-        UI.initSetting('reconnect', false);
-        UI.initSetting('reconnect_delay', 5000);
-
+        UI.initSetting('reconnect', true);
+        UI.initSetting('reconnect_delay', 500);        
         UI.setupSettingLabels();
     },
     // Adds a link to the label elements on the corresponding input elements
@@ -1128,10 +1127,12 @@ const UI = {
             UI.showStatus(_("Disconnected"), 'normal');
         }
 
+        UI.connect(null, UI.reconnectPassword);
+
         document.title = PAGE_TITLE;
 
-        UI.openControlbar();
-        UI.openConnectPanel();
+        //UI.openControlbar();
+        //UI.openConnectPanel();
     },
 
     securityFailed(e) {
@@ -1206,6 +1207,8 @@ const UI = {
  * ------v------*/
 
     toggleFullscreen() {
+        parent.postMessage("toggleFullscreen", "*");
+        /*
         if (document.fullscreenElement || // alternative standard method
             document.mozFullScreenElement || // currently working methods
             document.webkitFullscreenElement ||
@@ -1231,6 +1234,7 @@ const UI = {
             }
         }
         UI.updateFullscreenButton();
+        */
     },
 
     updateFullscreenButton() {
