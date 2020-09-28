@@ -171,6 +171,7 @@ export default class RFB extends EventTargetMixin {
             handleMouse: this._handleMouse.bind(this),
             handleWheel: this._handleWheel.bind(this),
             handleGesture: this._handleGesture.bind(this),
+            handleTouch: this._handleTouch.bind(this),
         };
 
         // main setup
@@ -551,6 +552,11 @@ export default class RFB extends EventTargetMixin {
         this._canvas.addEventListener("gesturemove", this._eventHandlers.handleGesture);
         this._canvas.addEventListener("gestureend", this._eventHandlers.handleGesture);
 
+        this._canvas.addEventListener('touchstart', this._eventHandlers.handleTouch);
+        this._canvas.addEventListener('touchend', this._eventHandlers.handleTouch);
+        this._canvas.addEventListener('touchmove', this._eventHandlers.handleTouch);
+        this._canvas.addEventListener('touchcancel', this._eventHandlers.handleTouch);
+
         Log.Debug("<< RFB.connect");
     }
 
@@ -560,6 +566,10 @@ export default class RFB extends EventTargetMixin {
         this._canvas.removeEventListener("gesturestart", this._eventHandlers.handleGesture);
         this._canvas.removeEventListener("gesturemove", this._eventHandlers.handleGesture);
         this._canvas.removeEventListener("gestureend", this._eventHandlers.handleGesture);
+        this._canvas.removeEventListener('touchstart', this._eventHandlers.handleTouch);
+        this._canvas.removeEventListener('touchend', this._eventHandlers.handleTouch);
+        this._canvas.removeEventListener('touchcancel', this._eventHandlers.handleTouch);
+        this._canvas.removeEventListener('touchmove', this._eventHandlers.handleTouch);
         this._canvas.removeEventListener("wheel", this._eventHandlers.handleWheel);
         this._canvas.removeEventListener('mousedown', this._eventHandlers.handleMouse);
         this._canvas.removeEventListener('mouseup', this._eventHandlers.handleMouse);
@@ -1087,6 +1097,25 @@ export default class RFB extends EventTargetMixin {
         this._fakeMouseMove(this._gestureFirstDoubleTapEv, pos.x, pos.y);
         this._handleMouseButton(pos.x, pos.y, true, bmask);
         this._handleMouseButton(pos.x, pos.y, false, bmask);
+    }
+
+    _handleTouch(ev) {
+        for (let i = 0; i < ev.changedTouches.length; i++) {
+            let touch = ev.changedTouches[i];
+            let pos = clientToElement(touch.clientX, touch.clientY, this._canvas);
+            switch (ev.type) {
+                case 'touchstart':
+                    this._handleMouseButton(pos.x, pos.y, true, 1 << ev.button);
+                    break;
+                case 'touchend':
+                case 'touchcancel':
+                    this._handleMouseButton(pos.x, pos.y, false, 1 << ev.button);
+                    break;
+                case 'touchmove':
+                    this._handleMouseMove(pos.x, pos.y);
+                    break;
+            }
+        }
     }
 
     _handleGesture(ev) {
